@@ -1,0 +1,8 @@
+doctype html
+html(lang="en")
+  head
+    script(src='http://code.jquery.com/jquery-latest.js')
+    script(src='front.js')
+  body
+    p#welcome Welcome,
+    p= user

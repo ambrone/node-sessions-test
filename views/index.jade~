@@ -1,0 +1,12 @@
+doctype html
+html(lang="en")
+  head
+    script(src='http://code.jquery.com/jquery-latest.js')
+    script(src='front.js')
+  body
+    form#login(action='/adduser' method='post' name='login') 
+      input#user(type='text' name='user')
+      input#pass(type='text' name='pass')
+      //input(type='submit', value='login')
+      input#addUser(type='submit' value='add user')
+    p= message

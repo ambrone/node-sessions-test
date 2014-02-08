@@ -1,0 +1,52 @@
+exports.index = function(db){
+    return function(req,res){
+	
+	console.log('req.session.user:' );
+	console.log(req.session.user);
+	if(req.session.user != undefined){
+	    res.render('loggedin', {'user':req.session.user});
+	}
+	else{
+	    console.log(req.session.cookie);
+	    res.render('index', {message:'hat'});
+	}
+    }
+}
+
+
+
+exports.adduser = function(db, mongoose, newUserSchema, newUserModel){
+
+    return function(req,res){
+
+	var user = req.body.user;
+	req.session.user = user;
+	var newUser = new newUserModel({
+	    'user':req.body.user , 
+	    'pass':req.body.pass,
+	    'session':req.session
+	});
+	newUser.save(function(err){
+	    if(err)console.log(err);
+	    
+	    //res.render('loggedin',  {user:req.body.user}, function(err){
+		//console.log(err);
+	    //});
+
+	})
+	console.log(newUser.user);
+	res.render('loggedin', {'user':user});
+	
+    }
+}
+
+exports.login = function(db,mongoose, newUserModel){
+    return function(req,res){
+	var user = req.body.user;
+	var pass = req.body.pass;
+	console.log(user+pass);
+	newUserModel.find({'user':user}, function(thing){
+	    console.log(thing);
+	})
+    }
+}

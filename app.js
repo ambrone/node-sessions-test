@@ -33,7 +33,9 @@ app.use(app.router);
 app.use(express.static('./static'));
 
 app.get('/', routes.index(db , mongoose) );//function(req,res){res.send('hello')});
-app.post('/',routes.index(db,mongoose));
+
+app.post('/logout',routes.logout(db));
+
 var newUserSchema = mongoose.Schema({user:String , pass:String, session:Object});
 var newUserModel =  mongoose.model('users' , newUserSchema);
 

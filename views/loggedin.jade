@@ -6,5 +6,6 @@ html(lang="en")
   body
     p#welcome Welcome,
     p= user
-    form#logout(action='/' method='post' name='logout')
+    form#logout(action='/logout' method='post' name='logout')
+      input(type='hidden' name='user' value= user)
       input(type='submit' value='log out')

@@ -47,7 +47,6 @@ exports.login = function(db,mongoose, newUserModel){
 	var user = req.body.user;
 	var pass = req.body.pass;
 	console.log(user+pass);
-//	console.log(newUserModel.find({},function(){}));
 	newUserModel.findOne({user:req.body.user}, function(err, thing){
 	    if(err)console.log(err);
 	    if (thing == null){
@@ -66,5 +65,14 @@ exports.login = function(db,mongoose, newUserModel){
 		}
 	    }
 	})
+    }
+}
+
+exports.logout = function(db){
+    return function(req,res){
+	console.log('req.body.user: '+req.body.user);
+	console.log('req.session.user:' + req.session.user);
+	res.clearCookie('connect.sid');
+	res.render('index',{message:'you have logged out'});
     }
 }

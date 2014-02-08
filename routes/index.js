@@ -21,8 +21,10 @@ exports.adduser = function(db, mongoose, newUserSchema, newUserModel){
 
 	var user = req.body.user;
 	var pass = req.body.pass;
-	req.session.user = user;
-	req.session.pass = pass;
+	console.log(req.body.remember);
+	if(req.body.remember == 'on'){
+	    req.session.user = user;
+	}
 	var newUser = new newUserModel({
 	    'user':req.body.user , 
 	    'pass':req.body.pass
@@ -47,11 +49,14 @@ exports.login = function(db,mongoose, newUserModel){
 	var user = req.body.user;
 	var pass = req.body.pass;
 	console.log(user+pass);
+	if(req.body.remember == 'on'){
+	    req.session.user = user;
+	}
 	newUserModel.findOne({user:req.body.user}, function(err, thing){
 	    if(err)console.log(err);
 	    if (thing == null){
 		res.redirect('/');
-		res.render('index' , {message:'try again'});
+		res.render('index' , {message:'no user exists named '+req.body.user});
 	    }else{
 		console.log('thing: '+ thing+typeof thing);
 		console.log(thing.user);
@@ -61,7 +66,7 @@ exports.login = function(db,mongoose, newUserModel){
 		    res.render('loggedin',{'user':user});
 		    //res.redirect('/');
 		}else{
-		    res.render('index', {message:'try again'});
+		    res.render('index', {message:'password incorrect'});
 		}
 	    }
 	})

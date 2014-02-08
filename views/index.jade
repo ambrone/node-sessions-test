@@ -9,8 +9,12 @@ html(lang="en")
       input.pass(type='text' name='pass')
       //input(type='submit', value='login')
       input#addUser(type='submit' value='add user')
+      label remember me
+        input.rememberMe(type='checkbox' name='remember' )
     form#login(action='/login' method='post' name='login')
       input.user(type='text' name='user')
       input.pass(type='text' name='pass')
       input.login(type='submit' value='login')
+      label remember me
+        input.rememberMe(type='checkbox' name='remember' )
     p= message

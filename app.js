@@ -32,15 +32,23 @@ app.use(express.session({
 app.use(app.router);
 app.use(express.static('./static'));
 
-app.get('/', routes.index(db , mongoose) );//function(req,res){res.send('hello')});
+
+var newUserSchema = mongoose.Schema({user:String , pass:String, session:Object, stuff:Array});
+var newUserModel =  mongoose.model('users' , newUserSchema);
+
+app.get('/', routes.index(db , mongoose, newUserModel) );//function(req,res){res.send('hello')});
+
 
 app.post('/logout',routes.logout(db));
 
-var newUserSchema = mongoose.Schema({user:String , pass:String, session:Object});
-var newUserModel =  mongoose.model('users' , newUserSchema);
+app.get('/logout' , routes.index(db,newUserModel));
+app.get('/adduser', routes.adduser());
 
 app.post('/adduser' ,routes.adduser(db, mongoose, newUserSchema, newUserModel));
 app.post('/login' , routes.login(db,mongoose,newUserModel));
+app.post('/addstuff' , routes.addstuff(db,mongoose,newUserModel));
+
+
 /*
 var dogSchema = mongoose.Schema({name:String , age:Number});
 var Dog = mongoose.model('HAT' , dogSchema);

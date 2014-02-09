@@ -1,0 +1,8 @@
+.user, .pass{
+    border: none;
+    height: 21px;
+    background: grey;
+    padding: 5px;
+    margin:5px;
+    color:whitesmoke
+}

@@ -9,3 +9,11 @@ html(lang="en")
     form#logout(action='/logout' method='post' name='logout')
       input(type='hidden' name='user' value= user)
       input(type='submit' value='log out')
+    label add stuff here:
+    form#add(action='/addstuff' method='post' name='addstuff')
+      input(type='hidden' name='user' value= user)
+      textarea#stuff(type='textarea' name='stuff')
+      input(type='submit'  value='add')
+    ul#stufflist
+      each thing, i in stuff
+        li= thing

@@ -1,5 +1,6 @@
 var express = require('express');
 var http = require('http');
+var https = require('https');
 var path = require('path');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
@@ -8,6 +9,7 @@ var fs = require('fs');
 var MongoStore = require('connect-mongo')(express);
 var routes = require('./routes');
 var jade = require('jade');
+var bcrypt = require('bcrypt');
 var app = express();
 
 var db = mongoose.connection;
@@ -27,26 +29,26 @@ app.use(express.session({
     })
 }));
 
-
-
 app.use(app.router);
 app.use(express.static('./static'));
 
 
-var newUserSchema = mongoose.Schema({user:String , pass:String, session:Object, stuff:Array});
+var newUserSchema = mongoose.Schema(
+    {user:String , pass:String, session:Object, stuff:Array}
+);
 var newUserModel =  mongoose.model('users' , newUserSchema);
 
-app.get('/', routes.index(db , mongoose, newUserModel) );//function(req,res){res.send('hello')});
+app.get('/', routes.index(db , newUserModel) );
 
 
 app.post('/logout',routes.logout(db));
 
 app.get('/logout' , routes.index(db,newUserModel));
-app.get('/adduser', routes.adduser());
+app.get('/adduser', function(req,res){res.redirect('/')});
 
-app.post('/adduser' ,routes.adduser(db, mongoose, newUserSchema, newUserModel));
-app.post('/login' , routes.login(db,mongoose,newUserModel));
-app.post('/addstuff' , routes.addstuff(db,mongoose,newUserModel));
+app.post('/adduser' ,routes.adduser(db, newUserModel, bcrypt));
+app.post('/login' , routes.login(db,newUserModel , bcrypt));
+app.post('/addstuff' , routes.addstuff(db, newUserModel));
 
 
 /*
@@ -58,5 +60,12 @@ amber.save(function(err){
 });
 */
 
+var options = {
+    key:fs.readFileSync('./test-key.pem'),
+    cert:fs.readFileSync('./cert.pem')
+}
+
+
 app.listen(3000);
+https.createServer(options, app).listen(443);
 console.log('listening on 3000');

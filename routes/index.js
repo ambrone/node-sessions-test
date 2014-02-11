@@ -1,8 +1,5 @@
-exports.index = function(db, mongoose, newUserModel){
+exports.index = function(db, newUserModel){
     return function(req,res){
-	
-	console.log('req.session.user:' );
-	console.log(req.session.user);
 	if(req.session.user != undefined){
 	    newUserModel.findOne({user:req.session.user},function(err,thing){
 		if(err)console.log(err);
@@ -10,88 +7,85 @@ exports.index = function(db, mongoose, newUserModel){
 	    });
 	}
 	else{
-	    console.log(req.session.cookie);
 	    res.render('index', {message:'hat'});
 	}
     }
 }
 
-
-
-exports.adduser = function(db, mongoose, newUserSchema, newUserModel){
-
+exports.adduser = function(db, newUserModel, bcrypt){
     return function(req,res){
 	if(req.body.user){	    
 	    var user = req.body.user;
-	    var pass = req.body.pass;
-	    console.log(req.body.remember);
-	    if(req.body.remember == 'on'){
-		req.session.user = user;
-	    }
-	    var newUser = new newUserModel({
-		'user':req.body.user , 
-		'pass':req.body.pass
-		//	    'session':req.session
+	    newUserModel.findOne({user:req.body.user},function(err,thing){
+		console.log(thing == null);
+		if(thing != null){
+		    console.log(thing);
+		    res.render('index' ,{message:'username taken'});
+		    return;
+		}else{ 
+		    var newUser = new newUserModel({'user':req.body.user , 'pass':''});
+		    var hash = bcrypt.genSalt(10, function(err, salt) {
+			console.log('salt: '+salt)
+			return bcrypt.hash(req.body.pass, salt, function(err, hash) {
+			    console.log('hash: '+hash);
+			    newUser.pass = hash;
+			    newUser.update({pass:hash},function(){});
+			});
+		    });
+		    
+		    if(req.body.remember == 'on'){
+			req.session.user = user;
+		    }
+		    
+		    newUser.save(function(err){
+			if(err)console.log(err);
+		    })
+		    res.render('loggedin', {'user':user, 'stuff':['no stuff yet']});
+		}
 	    });
-	    newUser.save(function(err){
-		if(err)console.log(err);
-		
-		//res.render('loggedin',  {user:req.body.user}, function(err){
-		//console.log(err);
-		//});
-		
-	    })
-	    console.log(newUser.user);
-	    res.render('loggedin', {'user':user, 'stuff':['no stuff']});
-	    
-	}
-	else{
+	}else{
 	    res.redirect('/');
 	}
     }
 }
 
-exports.login = function(db,mongoose, newUserModel){
+
+exports.login = function(db, newUserModel, bcrypt){
     return function(req,res){
-	var user = req.body.user;
-	var pass = req.body.pass;
-	console.log(user+pass);
 	if(req.body.remember == 'on'){
-	    req.session.user = user;
+	    req.session.user = req.body.user;
 	}
 	newUserModel.findOne({user:req.body.user}, function(err, thing){
 	    if(err)console.log(err);
-//	    console.log(thing == null);
 	    if(thing == null){
-		console.log('thing == null');
-		//res.redirect('/');
 		res.render('index' , {message:'no user exists named '+req.body.user});
 	    }else{
-		console.log('thing: '+ thing+typeof thing);
-		console.log(thing.user);
-		console.log(pass);
-		
-		if(thing.pass == pass){
-		    res.render('loggedin',{user:user, stuff: thing.stuff} );
-		    //res.redirect('/');
-		}else{
-		    res.render('index', {message:'password incorrect'});
-		}
+		bcrypt.compare(req.body.pass, thing.pass, function(err, response) {
+		    if(err){
+			console.log(err);
+			res.render('index' , {message:'An error occurred. Please try again.'});
+		    }
+		    else if(response == true){
+			res.render('loggedin' , {user:req.body.user,stuff:thing.stuff});
+		    }else{
+			res.render('index', {message:'password incorrect'});
+		    }
+		})
 	    }
 	})
     }
 }
 
-exports.addstuff = function(db, mongoose, newUserModel){
+
+
+exports.addstuff = function(db, newUserModel){
     return function(req,res){
-	console.log(req.body.stuff);
-	var arr;
 	var t = newUserModel.findOne({user:req.body.user},function(err,thing){
 	    if(err)console.log(err);
-	    arr = thing.stuff
+	    var arr = thing.stuff
 	    arr.push(req.body.stuff);
 	    thing.stuff = arr;
-	    thing.save(function(){});
+	    thing.save(function(err){if(err)console.log(err)});
 	    res.render('loggedin' , {user:req.body.user , stuff:arr});
 	});
 	

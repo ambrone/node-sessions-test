@@ -2,28 +2,36 @@ $(document).ready(function(){
     var c = document.getElementById('canvas');
     c.height = 500;
     c.width = 500;
-    var ctx = c.getContext('2d');
-    var Ball = function(x,y,xvel,yvel,a, color){
+    ctx = c.getContext('2d');
+    var Ball = function(x,y,xvel,yvel,a, color,mass, size){
+	if(mass){
+	    this.mass = mass;
+	}else{
+	    this.mass = 1;
+	}
+	this.size = size;
+	this.color = color;
 	this.x = x;
 	this.y = y;
 	this.xvel = xvel;
 	this.yvel = yvel;
 	this.a = a;
 	this.move = function(){
-	    console.log(this.x);
 	    this.x += this.xvel;
-	    this.y = this.y + .5*a*.001 + this.yvel * .01;
-	    this.yvel += a*.01;
+	    if(this.a == 0){
+		this.y += this.yvel;
+	    }else{
+		this.y = this.y + .5*a*.00001 + this.yvel * .001;
+		this.yvel += a*.001;
+	    }
 	}
-	this.color = color;
 	this.draw = function(){
 	    ctx.fillStyle = this.color;
 	    ctx.beginPath();
-	    ctx.arc(this.x,this.y,10,0,2*Math.PI);
+	    ctx.arc(this.x,this.y,this.size,0,2*Math.PI);
 	    ctx.fill();
 	}
 	this.bounce = function(dir){
-	    console.log(this.xvel);
 	    if(dir == 'x'){
 		this.xvel *= -1;
 	    }
@@ -31,56 +39,70 @@ $(document).ready(function(){
 		this.yvel *= -1;
 	    }
 	}
+	this.stop = function(){
+	    this.xvel = 0;
+	    this.yvel = 0;
+	    window.clearInterval(id);
+	}
     }
     var id;
     
     launch = function(balls){
 	ctx.clearRect(0,0,c.width,c.height);
 	balls.forEach(function(ball){
-	    ball.move();
-	    ball.draw();
-	    if(ball.x > c.width){
-		ball.x = c.width;
-		ball.bounce('x');
-	    }
-	    if(ball.x <= 0){
-		ball.x = 5;
-		ball.bounce('x');
-	    }
-	    if(ball.y < 0){
-		ball.y = 0;
-		ball.bounce('y');
-	    }
-	    if(ball.y > c.height){
-		ball.y = c.height;
-		ball.bounce('y');
-	    }
+	    
+	    if(Math.sqrt( Math.pow(balls[0].x-balls[1].x , 2) + Math.pow(balls[0].y - balls[1].y , 2) ) < balls[0].size + balls[1].size ){
+//		balls[0].stop();
+//		balls[1].stop();
+		console.log("balls[0].x - balls[1].x " + (balls[0].x - balls[1].x));
+		console.log(Math.sqrt( Math.pow(balls[0].x-balls[1].x , 2) + Math.pow(balls[0].y - balls[1].y , 2) ));
+		console.log(balls[0].size + balls[1].size);
 
-
-	    if(Math.abs(balls[0].x - balls[1].x) < 10 && Math.abs(balls[0].y - balls[1].y) < 10){
 		var x0 = balls[0].xvel;
 		var x1 = balls[1].xvel;
 		var y0 = balls[0].yvel;
 		var y1 = balls[1].yvel;
 
-		balls[0].xvel = x1;
-		balls[0].yvel = y1;
-		balls[1].xvel = x0;
-		balls[1].yvel = y0;
+		balls[0].xvel = ( (balls[0].mass -balls[1].mass)*x0 + 2 * balls[1].mass * x1 ) / (balls[0].mass + balls[1].mass );
+		balls[0].yvel = ( (balls[0].mass -balls[1].mass)*y0 + 2 * balls[1].mass * y1 ) / (balls[0].mass + balls[1].mass );
+		balls[1].xvel = ( 2 * balls[0].mass * x0 + (balls[1].mass - balls[0].mass)*x1 ) / (balls[0].mass + balls[1].mass );
+		balls[1].yvel = ( 2 * balls[0].mass * y0 + (balls[1].mass - balls[0].mass)*y1 ) / (balls[0].mass + balls[1].mass );
 		
 	    }
+ 	    if(ball.x > c.width - ball.size){
+		ball.x = c.width-ball.size;
+		ball.bounce('x');
+	    }
+	    if(ball.x <= 0 + ball.size){
+		ball.x = ball.size;
+		ball.bounce('x');
+	    }
+	    if(ball.y <  ball.size){
+		ball.y = ball.size;
+		ball.bounce('y');
+	    }
+	    if(ball.y > c.height - ball.size ){
+		ball.y = c.height-ball.size;
+		ball.bounce('y');
+	    }
+//v1 = [ (m1 - m2)u1 + 2m2 u2 ] / (m1 + m2)
+//v2 = [ 2m1 u1 + (m2 - m1)u2 ] / (m1 + m2)
+//	    if(Math.abs(balls[0].x - balls[1].x) < balls[0].size + balls[1].size && Math.abs(balls[0].y - balls[1].y) < balls[0].size + balls[1].size){
 	    
+	    ball.move();
+	    ball.draw();
+
 	});
     }
-    var ball = new Ball(499,499,-2,-300,30,'red');
-    var ball2 = new Ball(0,499,3,100,30,'purple');
+    var ball = new Ball(250,250,2,-1,0,'red', 1, 30);
+    var ball2 = new Ball(0,499,1,3,0,'purple', 1, 30);
     var ball3 = new Ball(0,0,30,100,40,'cyan');
     var ball4 = new Ball(0,0,100,500,30,'blue');
     var ball5 = new Ball(0,0,7,400,3,'orange');
 
-    window.setInterval(function(){
+    id = window.setInterval(function(){
 	launch([ball , ball2]);//, ball3, ball4, ball5]);
-    },10);
+    },1);
     
     drop = function(ball,x,y,a,yvel,xvel, trace){
 //	var ball = new Ball();
@@ -123,8 +145,8 @@ $(document).ready(function(){
 		console.log(ball.vel);
 		ball.yvel = - .9 * ball.yvel;
 		ball.xvel = .9 * ball.xvel;
-		//window.clearTimeout(id);
-		//drop(ball.x , ball.y, a, -.9*ball.vel, xvel,trace);
+	
+	
 	    }
 	    //bounce top
 	    if(ball.y < 0){
@@ -133,11 +155,6 @@ $(document).ready(function(){
 		ball.yvel = -.95 * ball.yvel;
 		ball.xvel = .9 * ball.xvel;
 	    }
-	    //stop
-//	    if(ball.y > c.height-10 && Math.abs(ball.vel) < 2 ){
-//		window.clearTimeout(id);
-//		ctx.fillRect(ball.x,ball.y,10,10);
-//	    }
 	    
 	}, 10)
     }
@@ -165,3 +182,4 @@ $(document).ready(function(){
 
 var drop;
 var launch;
+var ctx;

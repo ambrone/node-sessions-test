@@ -1,0 +1,70 @@
+$(document).ready(function(){
+    var c = document.getElementById('canvas');
+    c.height = 500;
+    c.width = 600;
+    var ctx = c.getContext('2d');
+    var Ball = function(){
+	this.x = 0;
+	this.y = 0;
+	this.vel = 0;
+    }
+    var id;
+    drop = function(x,y,a,yvel,xvel, trace){
+	var ball = new Ball();
+	ball.x = x;
+	ball.y = y;
+	ball.vel = yvel;
+	id = window.setInterval(function(){
+	    if(trace!=true){
+		ctx.clearRect(0,0,c.width,c.height);
+	    }
+	    ctx.fillRect(ball.x,ball.y,10,10);
+	    ball.x += xvel;
+
+	    var v = ball.vel;
+	    ball.vel += a*.01;
+	    ball.y = ball.y + .5*a*.001 + ball.vel * .01;
+	    
+	    //bounce
+	    if(ball.y > c.height-10 && ball.vel > 0){
+		console.log(ball.vel);
+		window.clearTimeout(id);
+		drop(ball.x , ball.y, a, -.9*ball.vel, xvel,trace);
+	    }
+	    //fall
+	    //	else if(ball.vel > 0.1 && yvel <0){
+	    //	    console.log('FALL');
+//	    window.clearTimeout(id);
+	    //	    drop(ball.x, ball.y , a , 0 , xvel,trace);
+	    //	}
+	    //stop
+	    if(ball.y > c.height-10 && Math.abs(ball.vel) < 2 ){
+		window.clearTimeout(id);
+		ctx.fillRect(ball.x,ball.y,10,10);
+	    }
+	    
+	}, 10)
+    }
+    
+    $('#launch').on('click', function(){
+	
+	var arr = [$('#xpos').val() , $('#ypos').val() ,$('#gravity').val(), $('#yvel').val() , $('#xvel').val()];
+	for(x in arr){
+	    arr[x] = parseInt(arr[x]);
+	}
+	drop(arr[0],arr[1], arr[2] , arr[3] , arr[4] , arr[5]);
+	//drop($('#xpos').val() , $('#ypos').val() ,$('#gravity').val(), $('#yvel').val() , $('#xvel').val(), true); 
+	console.log(arr);
+    });
+    $('#stop').on('click' , function(){
+	window.clearTimeout(id);
+	ctx.clearRect(0,0,c.width,c.height);
+    });
+    function ct(){
+	window.clearTimeout(id);
+    }
+    //c.onclick(cleart(id));
+    
+});
+
+var drop

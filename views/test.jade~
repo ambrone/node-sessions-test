@@ -1,0 +1,22 @@
+doctype html
+html(lang="en")
+  head
+    
+    
+  body
+    div#controlBox
+      button#launch(value='launch') launch
+      button#stop(value='stop') stop
+      label gravity
+        input#gravity(type='text' value='3')
+      label x-velocity
+        input#xvel(type='text' value='1')
+      label y-velocity
+        input#yvel(type='text' value='450')
+      label x-pos
+        input#xpos(type='text' value='0')
+      label y-pos
+        input#ypos(type='text' value='300')
+    canvas#canvas(style="border:solid 1px black")
+    script(src='//code.jquery.com/jquery-latest.js')
+    script(src='test.js')

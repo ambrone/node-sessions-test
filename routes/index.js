@@ -15,17 +15,14 @@ exports.index = function(db, newUserModel){
 exports.adduser = function(db, newUserModel, bcrypt){
     return function(req,res){
 	if(req.body.user){	    
-	    var user = req.body.user;
 	    newUserModel.findOne({user:req.body.user},function(err,thing){
 		console.log(thing == null);
 		if(thing != null){
-		    console.log(thing);
 		    res.render('index' ,{message:'username taken'});
-		    return;
 		}else{ 
 		    var newUser = new newUserModel({'user':req.body.user , 'pass':''});
 		    var hash = bcrypt.genSalt(10, function(err, salt) {
-			console.log('salt: '+salt)
+			console.log('salt: '+salt);
 			return bcrypt.hash(req.body.pass, salt, function(err, hash) {
 			    console.log('hash: '+hash);
 			    newUser.pass = hash;
@@ -34,13 +31,13 @@ exports.adduser = function(db, newUserModel, bcrypt){
 		    });
 		    
 		    if(req.body.remember == 'on'){
-			req.session.user = user;
+			req.session.user = req.body.user;
 		    }
 		    
 		    newUser.save(function(err){
 			if(err)console.log(err);
 		    })
-		    res.render('loggedin', {'user':user, 'stuff':['no stuff yet']});
+		    res.render('loggedin', {'user':req.body.user, 'stuff':['no stuff yet']});
 		}
 	    });
 	}else{
@@ -80,17 +77,61 @@ exports.login = function(db, newUserModel, bcrypt){
 
 exports.addstuff = function(db, newUserModel){
     return function(req,res){
-	var t = newUserModel.findOne({user:req.body.user},function(err,thing){
+	console.log(req.body.user);
+	newUserModel.findOne({user:req.body.user},function(err,thing){
 	    if(err)console.log(err);
-	    var arr = thing.stuff
+	    if(thing == null){
+		console.log('null thing');
+		res.send('nothing');
+		return;
+	    }
+	    var arr = thing.stuff;
+	    console.log(arr);
 	    arr.push(req.body.stuff);
 	    thing.stuff = arr;
-	    thing.save(function(err){if(err)console.log(err)});
+	    thing.save(function(){});
 	    res.render('loggedin' , {user:req.body.user , stuff:arr});
+/*
+	    if(arr.length ==0){
+		console.log('arr.length == 0');
+		arr.push(req.body.stuff);
+		thing.stuff = arr;
+		thing.save(function(){});
+		res.render('loggedin' , {user:req.body.user , stuff:arr});
+	    }else{
+		arr.forEach(function(entry){
+		    if(entry == req.body.stuff){
+			console.log(entry +'  '+ req.body.stuff);
+			res.render('loggedin' , {user:req.body.user , stuff:arr});
+			return;
+		    }else{
+			console.log('else');
+			arr.push(req.body.stuff);
+			thing.stuff = arr;
+			thing.save(function(err){if(err)console.log(err)});
+			res.render('loggedin' , {user:req.body.user , stuff:arr});
+		    }
+		});
+	    }
+*/
 	});
-	
     }
 }
+
+exports.deleteStuff = function(newUserModel){
+    return function(req,res){
+	console.log(req.body);
+	newUserModel.findOne({user:req.body.user},function(err,thing){
+	    var arr = thing.stuff;
+	    var index = arr.indexOf(req.body.stuff);
+	    arr.splice(index,1);
+	    thing.stuff = arr;
+	    thing.save(function(err){if(err)console.log(err)});
+	    res.send('deleted '+req.body.stuff);
+	})
+    }
+}
+
 
 exports.logout = function(db){
     return function(req,res){
@@ -100,3 +141,4 @@ exports.logout = function(db){
 	res.render('index',{message:'you have logged out'});
     }
 }
+

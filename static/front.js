@@ -1,23 +1,28 @@
 $(document).ready(function(){
-/*
-$('#addUser').on('click', function(){
-    
-    var user = $('#user').val();
-    var pass = $('#pass').val();
+
+$('.deleteStuff').on('click', function(){
+    var $this = $(this);
+    var stuff = {
+	user:$('#hiddenName').attr('value'),
+	stuff: $(this).siblings('p').html()
+    };
+    console.log(stuff);
     $.ajax({
-	type:'post',
-	data:JSON.stringify({'user':user,'pass':pass}),
-	url:'/adduser',
+	type:'pos',
+	data:JSON.stringify(stuff),
+	url:'/deleteStuff',
 	contentType:'application/json',
 	beforeSend:function(data){
 	    console.log('sending '+data);
 	},
 	success:function(data){
 	    console.log('success '+data);
-	    $('body').html(data);
+	    $this.parent().remove();
 	}
     });
 
 });
-*/
+
+
+
 });

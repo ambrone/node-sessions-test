@@ -42,14 +42,14 @@ app.get('/', routes.index(db , newUserModel) );
 
 
 app.post('/logout',routes.logout(db));
-
 app.get('/logout' , routes.index(db,newUserModel));
 app.get('/adduser', function(req,res){res.redirect('/')});
+app.get('/test' , function(req,res){res.render('test')});
 
 app.post('/adduser' ,routes.adduser(db, newUserModel, bcrypt));
 app.post('/login' , routes.login(db,newUserModel , bcrypt));
 app.post('/addstuff' , routes.addstuff(db, newUserModel));
-
+app.post('/deleteStuff' , routes.deleteStuff(newUserModel));
 
 /*
 var dogSchema = mongoose.Schema({name:String , age:Number});

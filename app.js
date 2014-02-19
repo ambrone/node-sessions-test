@@ -59,12 +59,18 @@ amber.save(function(err){
     if(err)console.log(err);
 });
 */
-
+/*
 var options = {
     key:fs.readFileSync('./test-key.pem'),
     cert:fs.readFileSync('./cert.pem')
 }
+*/
 
+var options = {
+    key:fs.readFileSync('./node-sessions-test.key'),
+    cert:fs.readFileSync('./node-sessions-test.crt')
+}
+	       
 
 app.listen(3000);
 https.createServer(options, app).listen(443);
